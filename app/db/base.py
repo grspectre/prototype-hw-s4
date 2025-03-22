@@ -1,6 +1,6 @@
 import uuid
 import enum
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, Enum
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, Enum, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
@@ -27,6 +27,14 @@ class User(TimestampSoftDeleteMixin, Base):
     
     reviews = relationship("Review", back_populates="user")
     cart_items = relationship("CartItem", back_populates="user")
+    user_tokens = relationship("UserToken", back_populates="user")
+
+class UserToken(TimestampSoftDeleteMixin, Base):
+    __tablename__ = "user_tokens"
+
+    token_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    expired_at = Column(DateTime, nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"))
 
 class Category(TimestampSoftDeleteMixin, Base):
     __tablename__ = "categories"
