@@ -1,17 +1,28 @@
 import uuid
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text
+import enum
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, Enum
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from app.db.base_mixins import TimestampSoftDeleteMixin
 
 Base = declarative_base()
+
+class UserRoles(enum.Enum):
+    admin = "admin"
+    user = "user"
+
 
 class User(TimestampSoftDeleteMixin, Base):
     __tablename__ = "users"
 
     user_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username = Column(String, unique=True, index=True)
+    name = Column(String(100))
+    last_name = Column(String(150))
+    password = Column(String(64))
+    salt = Column(String(32))
+    roles = Column(ARRAY(Enum(UserRoles)), nullable=False, default=[UserRoles.user])
     email = Column(String, unique=True, index=True)
     
     reviews = relationship("Review", back_populates="user")
