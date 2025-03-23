@@ -1,17 +1,37 @@
 import uuid
 import enum
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, Enum, DateTime
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, Enum, DateTime, select
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from app.db.base_mixins import TimestampSoftDeleteMixin
+from datetime import datetime as dt
+from sqlalchemy.ext.asyncio import AsyncSession
 
 Base = declarative_base()
 
-class UserRoles(enum.Enum):
+
+async def get_user_by_id(session: AsyncSession, idx):
+    stmt = select(User).where(User.user_id == idx)
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none()
+
+
+class UserRoles(str, enum.Enum):
     admin = "admin"
     user = "user"
 
+class UserToken(TimestampSoftDeleteMixin, Base):
+    __tablename__ = "user_tokens"
+
+    token_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    expired_at = Column(DateTime, nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"))
+
+    user = relationship("User", back_populates="user_tokens")
+
+    def is_expired(self) -> bool:
+        return self.expired_at < dt.now()
 
 class User(TimestampSoftDeleteMixin, Base):
     __tablename__ = "users"
@@ -28,13 +48,6 @@ class User(TimestampSoftDeleteMixin, Base):
     reviews = relationship("Review", back_populates="user")
     cart_items = relationship("CartItem", back_populates="user")
     user_tokens = relationship("UserToken", back_populates="user")
-
-class UserToken(TimestampSoftDeleteMixin, Base):
-    __tablename__ = "user_tokens"
-
-    token_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    expired_at = Column(DateTime, nullable=False)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"))
 
 class Category(TimestampSoftDeleteMixin, Base):
     __tablename__ = "categories"
