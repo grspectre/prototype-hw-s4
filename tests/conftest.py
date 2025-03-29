@@ -1,11 +1,15 @@
+# conftest.py
 import pytest
+
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from app.db.base import Base
 from app.main import app
 from fastapi.testclient import TestClient
+from app.db.session import get_db
 
-TEST_DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/test_db"
+TEST_DATABASE_URL = "postgresql+asyncpg://pws:pws@localhost:5432/db_pws_test"
+
 
 @pytest.fixture
 def client():
@@ -27,3 +31,19 @@ async def async_session(async_engine):
     )
     async with async_session_maker() as session:
         yield session
+
+@pytest.fixture
+def override_get_db(async_session):
+    async def _override_get_db():
+        try:
+            yield async_session
+        finally:
+            pass
+    
+    return _override_get_db
+
+@pytest.fixture
+def client_with_db(client, override_get_db):
+    app.dependency_overrides[get_db] = override_get_db
+    yield client
+    app.dependency_overrides = {}
