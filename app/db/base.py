@@ -1,8 +1,7 @@
 import uuid
 import enum
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, Enum, DateTime, select
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from app.db.base_mixins import TimestampSoftDeleteMixin
 from datetime import datetime as dt

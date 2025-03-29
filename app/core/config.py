@@ -1,6 +1,9 @@
 import os
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 from typing import Optional
+
+PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "FastAPI App"
@@ -9,7 +12,6 @@ class Settings(BaseSettings):
     
     DATABASE_URL: str
     
-    class Config:
-        env_file = ".env"
-        
+    model_config = ConfigDict(env_file=os.path.join(PROJECT_PATH, ".env"))
+
 settings = Settings()
