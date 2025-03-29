@@ -1,11 +1,11 @@
 from fastapi import APIRouter
-from app.api.endpoints import health, user
+from app.api.endpoints import health, user, cart, category, product, review
 
 api_router = APIRouter()
 
 api_router.include_router(health.router, prefix="/health", tags=["health"])
 api_router.include_router(user.router, prefix="/api/v1/user", tags=["user"])
-# Здесь будет импорт и подключение эндпоинтов
-# from app.api.endpoints import items, users
-# api_router.include_router(users.router, prefix="/users", tags=["users"])
-# api_router.include_router(items.router, prefix="/items", tags=["items"])
+api_router.include_router(category.router, prefix="/api/v1/category", tags=["category"])
+api_router.include_router(product.router, prefix="/api/v1/product", tags=["product"])
+api_router.include_router(cart.router, prefix="/api/v1/cart", tags=["cart"])
+api_router.include_router(review.router, prefix="/api/v1/review", tags=["review"])
