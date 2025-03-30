@@ -1,6 +1,10 @@
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from fastapi import FastAPI
 from app.core.config import settings
 from app.api.api import api_router
+from fastapi import Request
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -10,9 +14,20 @@ app = FastAPI(
 
 app.include_router(api_router)
 
+
 @app.get("/")
 async def root():
     return {"message": "Welcome to the API"}
+
+
+@app.get('/list_endpoints/')
+def list_endpoints(request: Request):
+    url_list = [
+        {'path': route.path, 'name': route.name}
+        for route in request.app.routes
+    ]
+    return url_list
+
 
 if __name__ == "__main__":
     import uvicorn

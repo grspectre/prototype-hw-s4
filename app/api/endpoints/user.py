@@ -1,4 +1,4 @@
-# app/api/endpoints/auth.py
+# app/api/endpoints/user.py
 from fastapi import APIRouter, Depends, Security, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -85,10 +85,11 @@ async def login(
     # Store token in database
     token = UserToken(
         user_id=db_user.user_id,
-        expired_at=expires_at
+        expired_at=expires_at,
+        token_id=str(access_token)
     )
     db.add(token)
-    await db.commit()    
+    await db.commit()
     return {"access_token": str(access_token), "token_type": "bearer", "expires_at": expires_at}
 
 

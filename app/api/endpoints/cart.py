@@ -176,7 +176,7 @@ async def update_cart_item(
         )
     
     # Update cart item attributes
-    update_data = item_data.dict(exclude_unset=True)
+    update_data = item_data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(cart_item, key, value)
     

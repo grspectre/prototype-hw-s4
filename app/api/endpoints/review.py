@@ -67,7 +67,7 @@ async def create_review(
     
     return review
 
-@router.get("", response_model=PaginatedResponse[ReviewRead])
+@router.get("/", response_model=PaginatedResponse[ReviewRead])
 async def list_reviews(
     product_id: Optional[UUID] = None,
     user_id: Optional[UUID] = None,
@@ -222,110 +222,6 @@ async def get_user_reviews(
         pages=pages
     )
 
-@router.get("/{review_id}", response_model=ReviewRead)
-async def get_review(
-    review_id: UUID,
-    db: AsyncSession = Depends(get_db),
-):
-    """
-    Get a specific review by its ID.
-    """
-    query = select(Review).where(
-        Review.review_id == review_id,
-        Review.deleted_at.is_(None)
-    )
-    
-    result = await db.execute(query)
-    review = result.scalar_one_or_none()
-    
-    if not review:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Review with ID {review_id} not found"
-        )
-    
-    return review
-
-@router.put("/{review_id}", response_model=ReviewRead)
-async def update_review(
-    review_id: UUID,
-    review_data: ReviewUpdate,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """
-    Update an existing review.
-    Only the original author can update their review.
-    """
-    query = select(Review).where(
-        Review.review_id == review_id,
-        Review.deleted_at.is_(None)
-    )
-    
-    result = await db.execute(query)
-    review = result.scalar_one_or_none()
-    
-    if not review:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Review with ID {review_id} not found"
-        )
-    
-    # Check if the current user is the author of the review
-    if review.user_id != current_user.user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission to update this review"
-        )
-    
-    # Update review attributes
-    update_data = review_data.dict(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(review, key, value)
-    
-    review.updated_at = datetime.utcnow()
-    await db.commit()
-    await db.refresh(review)
-    
-    return review
-
-@router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_review(
-    review_id: UUID,
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """
-    Delete a review.
-    Only the original author can delete their review.
-    Uses soft delete.
-    """
-    query = select(Review).where(
-        Review.review_id == review_id,
-        Review.deleted_at.is_(None)
-    )
-    
-    result = await db.execute(query)
-    review = result.scalar_one_or_none()
-    
-    if not review:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Review with ID {review_id} not found"
-        )
-    
-    # Check if the current user is the author of the review
-    if review.user_id != current_user.user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You don't have permission to delete this review"
-        )
-    
-    # Soft delete the review
-    review.deleted_at = datetime.utcnow()
-    await db.commit()
-    
-    return None
 
 @router.get("/statistics/{product_id}", response_model=dict)
 async def get_review_statistics(
@@ -384,3 +280,109 @@ async def get_review_statistics(
         "total_reviews": total_reviews,
         "rating_counts": rating_counts
     }
+
+
+@router.get("/{review_id}", response_model=ReviewRead)
+async def get_review(
+    review_id: UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Get a specific review by its ID.
+    """
+    query = select(Review).where(
+        Review.review_id == review_id,
+        Review.deleted_at.is_(None)
+    )
+    
+    result = await db.execute(query)
+    review = result.scalar_one_or_none()
+    
+    if not review:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Review with ID {review_id} not found"
+        )
+    
+    return review
+
+@router.put("/{review_id}", response_model=ReviewRead)
+async def update_review(
+    review_id: UUID,
+    review_data: ReviewUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Update an existing review.
+    Only the original author can update their review.
+    """
+    query = select(Review).where(
+        Review.review_id == review_id,
+        Review.deleted_at.is_(None)
+    )
+    
+    result = await db.execute(query)
+    review = result.scalar_one_or_none()
+    
+    if not review:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Review with ID {review_id} not found"
+        )
+    
+    # Check if the current user is the author of the review
+    if review.user_id != current_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to update this review"
+        )
+    
+    # Update review attributes
+    update_data = review_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(review, key, value)
+    
+    review.updated_at = datetime.now()
+    await db.commit()
+    await db.refresh(review)
+    
+    return review
+
+@router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_review(
+    review_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Delete a review.
+    Only the original author can delete their review.
+    Uses soft delete.
+    """
+    query = select(Review).where(
+        Review.review_id == review_id,
+        Review.deleted_at.is_(None)
+    )
+    
+    result = await db.execute(query)
+    review = result.scalar_one_or_none()
+    
+    if not review:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Review with ID {review_id} not found"
+        )
+    
+    # Check if the current user is the author of the review
+    if review.user_id != current_user.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to delete this review"
+        )
+    
+    # Soft delete the review
+    review.deleted_at = datetime.now()
+    await db.commit()
+    
+    return None

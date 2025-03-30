@@ -1,6 +1,6 @@
 # app/schemas/product.py
 from typing import Optional, List
-from pydantic import BaseModel, UUID4, Field
+from pydantic import BaseModel, UUID4, Field, ConfigDict
 from datetime import datetime
 
 class CategoryBase(BaseModel):
@@ -17,8 +17,9 @@ class CategoryRead(CategoryBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
 class ProductBase(BaseModel):
     name: str
@@ -39,11 +40,13 @@ class ProductRead(ProductBase):
     created_at: datetime
     updated_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
 class ProductDetailRead(ProductRead):
     category: CategoryRead
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+    )

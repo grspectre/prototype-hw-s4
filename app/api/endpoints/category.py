@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.db.session import get_db
 from app.core.security import get_current_user
@@ -65,8 +65,8 @@ async def create_category(
     # Create new category
     category = Category(
         name=category_data.name,
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow()
+        created_at=datetime.now(),
+        updated_at=datetime.now()
     )
     
     db.add(category)
@@ -110,14 +110,14 @@ async def update_category(
         )
     
     # Update category attributes
-    update_data = category_data.dict(exclude_unset=True)
+    update_data = category_data.model_dump(exclude_unset=True)
     
     # Only process if there's data to update
     if update_data:
         for key, value in update_data.items():
             setattr(category, key, value)
         
-        category.updated_at = datetime.utcnow()
+        category.updated_at = datetime.now()
         
         try:
             await db.commit()
@@ -180,7 +180,7 @@ async def delete_category(
         )
     
     # Soft delete
-    category.deleted_at = datetime.utcnow()
+    category.deleted_at = datetime.now()
     await db.commit()
     
     return None

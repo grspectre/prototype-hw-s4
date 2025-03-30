@@ -3,21 +3,22 @@ from app.main import app
 from app.db.session import get_db
 
 
-def test_health_check(client):
-    response = client.get("/health/")
+@pytest.mark.asyncio
+async def test_health_check(async_client):
+    response = await async_client.get("/health/")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
 
 @pytest.mark.asyncio
-async def test_db_health_check(client):
-    response = client.get("/health/db")
+async def test_db_health_check(async_client):
+    response = await async_client.get("/health/db")
     assert response.status_code == 200
     assert response.json()["status"] == "Database connection established"
 
 
 @pytest.mark.asyncio
-async def test_db_health_check_failure(client, monkeypatch):
+async def test_db_health_check_failure(async_client, monkeypatch):
     # Mock the database query to raise an exception
     from sqlalchemy.ext.asyncio import AsyncSession
     
@@ -39,7 +40,7 @@ async def test_db_health_check_failure(client, monkeypatch):
     
     app.dependency_overrides[get_db] = mock_get_db
     
-    response = client.get("/health/db")
+    response = await async_client.get("/health/db")
     assert response.status_code == 200
     assert response.json()["status"] == "Database connection failed"
     assert "details" in response.json()

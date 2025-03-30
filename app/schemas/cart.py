@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pydantic import BaseModel, UUID4, Field
+from pydantic import BaseModel, UUID4, Field, ConfigDict
 from datetime import datetime
 from .product import ProductRead
 
@@ -17,11 +17,13 @@ class CartItemRead(CartItemBase):
     cart_item_id: UUID4
     user_id: UUID4
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
 class CartItemDetailRead(CartItemRead):
     product: ProductRead
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+    )

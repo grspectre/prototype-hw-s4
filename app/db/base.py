@@ -1,20 +1,28 @@
 import uuid
 import enum
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, Enum, DateTime, select
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from app.db.base_mixins import TimestampSoftDeleteMixin
 from datetime import datetime as dt
 from sqlalchemy.ext.asyncio import AsyncSession
 
-Base = declarative_base()
+Base = declarative_base()    
 
 
 async def get_user_by_id(session: AsyncSession, idx):
     stmt = select(User).where(User.user_id == idx)
     result = await session.execute(stmt)
     return result.scalar_one_or_none()
+
+
+async def get_user_by_token(session: AsyncSession, token_id: str):
+    stmt = select(UserToken).where(UserToken.token_id == token_id)
+    result = await session.execute(stmt)
+    token = result.scalar_one_or_none()
+    if token is None:
+        return None
+    return get_user_by_id(session, token.user_id)
 
 
 class UserRoles(str, enum.Enum):
