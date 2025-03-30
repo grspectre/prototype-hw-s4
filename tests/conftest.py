@@ -127,5 +127,33 @@ async def session_user_token(async_session: AsyncSession) -> str:
 
 
 @pytest.fixture(scope="function")
+async def session_user(async_session: AsyncSession) -> User:
+    login = "test_session"
+
+    query = select(User).where(User.username == login)
+    response = await async_session.execute(query)
+    db_user = response.scalar_one_or_none()
+
+    if db_user is None:
+        email = "test_session@example.com"
+        passwd = "testpassword"
+        hashed_password, salt = get_password_hash(passwd)
+        
+        db_user = User(
+            username=login,
+            email=email,
+            name="test_session",
+            last_name="test_session",
+            password=hashed_password,
+            salt=salt
+        )
+        
+        async_session.add(db_user)
+        await async_session.commit()
+        await async_session.refresh(db_user)
+    return db_user
+
+
+@pytest.fixture(scope="function")
 def auth_headers(session_user_token: str) -> dict:
     return {"Authorization": f"Bearer {session_user_token}"}
