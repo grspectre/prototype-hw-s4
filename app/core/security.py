@@ -88,7 +88,7 @@ async def get_current_user(
     credentials = Security(http_bearer)
 ) -> User:
     credentials_exception = get_credential_exception()
-    token = await get_token_if_not_expired()
+    token = await get_token_if_not_expired(db, credentials)
     user = await get_user_by_id(db, token.user_id)
     if user is None:
         raise credentials_exception

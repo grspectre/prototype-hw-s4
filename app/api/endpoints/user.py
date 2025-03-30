@@ -88,7 +88,7 @@ async def login(
         expired_at=expires_at
     )
     db.add(token)
-    await db.commit()    
+    await db.commit()
     return {"access_token": str(access_token), "token_type": "bearer", "expires_at": expires_at}
 
 
