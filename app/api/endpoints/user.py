@@ -1,4 +1,4 @@
-# app/api/endpoints/auth.py
+# app/api/endpoints/user.py
 from fastapi import APIRouter, Depends, Security, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session

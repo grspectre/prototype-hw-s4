@@ -60,7 +60,7 @@ async def get_token(
 
     query = select(UserToken).filter(UserToken.token_id == credentials.credentials)
     response = await db.execute(query)
-    token = await response.scalar_one_or_none()
+    token = response.scalar_one_or_none()
     if token is None:
         raise credentials_exception        
     return token
@@ -77,7 +77,7 @@ async def get_token_if_not_expired(
 
     query = select(UserToken).filter(UserToken.token_id == credentials.credentials)
     response = await db.execute(query)
-    token = await response.scalar_one_or_none()
+    token = response.scalar_one_or_none()
     if token is None or token.is_expired():
         raise credentials_exception        
     return token

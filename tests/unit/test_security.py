@@ -71,7 +71,7 @@ class TestGetToken:
 
     async def test_get_token_success(self, mock_db, mock_credentials, mock_token):
         # Setup mock query response
-        mock_response = AsyncMock()
+        mock_response = MagicMock()  # Changed from AsyncMock to MagicMock
         mock_response.scalar_one_or_none.return_value = mock_token
         mock_db.execute.return_value = mock_response
 
@@ -97,7 +97,7 @@ class TestGetToken:
 
     async def test_get_token_not_found(self, mock_db, mock_credentials):
         # Setup mock query response for token not found
-        mock_response = AsyncMock()
+        mock_response = MagicMock()  # Changed from AsyncMock to MagicMock
         mock_response.scalar_one_or_none.return_value = None
         mock_db.execute.return_value = mock_response
 
@@ -142,7 +142,7 @@ class TestGetTokenIfNotExpired:
 
     async def test_get_token_valid(self, mock_db, mock_credentials, mock_valid_token):
         # Setup mock query response
-        mock_response = AsyncMock()
+        mock_response = MagicMock()  # Changed from AsyncMock to MagicMock
         mock_response.scalar_one_or_none.return_value = mock_valid_token
         mock_db.execute.return_value = mock_response
 
@@ -156,7 +156,7 @@ class TestGetTokenIfNotExpired:
 
     async def test_get_token_expired(self, mock_db, mock_credentials, mock_expired_token):
         # Setup mock query response
-        mock_response = AsyncMock()
+        mock_response = MagicMock()  # Changed from AsyncMock to MagicMock
         mock_response.scalar_one_or_none.return_value = mock_expired_token
         mock_db.execute.return_value = mock_response
 
@@ -170,7 +170,7 @@ class TestGetTokenIfNotExpired:
 
     async def test_get_token_not_found(self, mock_db, mock_credentials):
         # Setup mock query response for token not found
-        mock_response = AsyncMock()
+        mock_response = MagicMock()  # Changed from AsyncMock to MagicMock
         mock_response.scalar_one_or_none.return_value = None
         mock_db.execute.return_value = mock_response
 
