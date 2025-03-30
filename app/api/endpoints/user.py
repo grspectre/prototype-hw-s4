@@ -85,7 +85,8 @@ async def login(
     # Store token in database
     token = UserToken(
         user_id=db_user.user_id,
-        expired_at=expires_at
+        expired_at=expires_at,
+        token_id=str(access_token)
     )
     db.add(token)
     await db.commit()
