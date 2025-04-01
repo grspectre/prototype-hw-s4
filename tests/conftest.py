@@ -1,5 +1,6 @@
 import pytest
 import asyncio
+import os
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
@@ -14,7 +15,10 @@ from sqlalchemy import select, delete
 TOKEN_CACHE = {"access_token": None, "user_id": None}
 ACCESS_TOKEN_EXPIRE_MINUTES = 120
 
-TEST_DATABASE_URL = "postgresql+asyncpg://pws:pws@localhost:5432/db_pws_test"
+if 'DATABASE_URL' in os.environ:
+    TEST_DATABASE_URL = os.environ['DATABASE_URL']
+else:
+    TEST_DATABASE_URL = "postgresql+asyncpg://pws:pws@localhost:5432/db_pws_test"
 
 
 @pytest.fixture(scope="function")
@@ -27,6 +31,7 @@ async def async_engine():
     yield engine
     await engine.dispose()
 
+
 @pytest.fixture(scope="function")
 async def async_session(async_engine):
     """Create an async session for testing."""
@@ -36,6 +41,7 @@ async def async_session(async_engine):
     async with async_session_maker() as session:
         yield session
         await session.rollback()  # Roll back any changes after the test
+
 
 @pytest.fixture(scope="function")
 async def override_get_db(async_session):

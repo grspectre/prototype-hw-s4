@@ -1,7 +1,7 @@
 import uuid
 import enum
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, Enum, DateTime, select
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Text, Enum, DateTime, select, Table
+from sqlalchemy.orm import relationship, declarative_base, selectinload
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from app.db.base_mixins import TimestampSoftDeleteMixin
 from datetime import datetime as dt
@@ -100,3 +100,61 @@ class CartItem(Base):
     
     user = relationship("User", back_populates="cart_items")
     product = relationship("Product", back_populates="cart_items")
+
+promotion_product = Table(
+    'promotion_products',
+    Base.metadata,
+    Column('promotion_id', UUID(as_uuid=True), ForeignKey('promotions.promotion_id')),
+    Column('product_id', UUID(as_uuid=True), ForeignKey('products.product_id'))
+)
+
+class Promotion(TimestampSoftDeleteMixin, Base):
+    __tablename__ = "promotions"
+    
+    promotion_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String, nullable=False, index=True)
+    description = Column(Text)
+    image_path = Column(String, nullable=True)
+    image_url = Column(String, nullable=True)
+    url = Column(String, nullable=True)
+    start_date = Column(DateTime, nullable=False)
+    end_date = Column(DateTime, nullable=False)
+    
+    products = relationship("Product", secondary=promotion_product, back_populates="promotions")
+
+Product.promotions = relationship("Promotion", secondary=promotion_product, back_populates="products")
+
+
+async def get_promotion_by_id(session: AsyncSession, promotion_id):
+    stmt = select(Promotion).options(
+        selectinload(Promotion.products)
+    ).where(Promotion.promotion_id == promotion_id)
+    
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none()
+
+
+async def get_active_promotions(session: AsyncSession, current_date):
+    stmt = select(Promotion).options(
+        selectinload(Promotion.products)
+    ).where(
+        Promotion.start_date <= current_date,
+        Promotion.end_date >= current_date,
+        Promotion.deleted_at.is_(None)
+    )
+    result = await session.execute(stmt)
+    return result.scalars().all()
+
+
+async def get_promotions_for_product(session: AsyncSession, product_id):
+    stmt = select(Promotion).options(
+        selectinload(Promotion.products)
+    ).join(
+        promotion_product, 
+        Promotion.promotion_id == promotion_product.c.promotion_id
+    ).where(
+        promotion_product.c.product_id == product_id,
+        Promotion.deleted_at.is_(None)
+    )
+    result = await session.execute(stmt)
+    return result.scalars().all()

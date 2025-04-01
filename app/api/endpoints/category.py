@@ -15,7 +15,7 @@ from app.schemas.pagination import PaginationParams, PaginatedResponse
 
 router = APIRouter()
 
-@router.get("/", response_model=PaginatedResponse[CategoryRead])
+@router.get("", response_model=PaginatedResponse[CategoryRead])
 async def get_categories(
     pagination: PaginationParams = Depends(),
     db: AsyncSession = Depends(get_db),
@@ -52,7 +52,7 @@ async def get_categories(
         pages=total_pages
     )
 
-@router.post("/", response_model=CategoryRead, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=CategoryRead, status_code=status.HTTP_201_CREATED)
 async def create_category(
     category_data: CategoryCreate,
     db: AsyncSession = Depends(get_db),

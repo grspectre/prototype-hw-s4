@@ -75,7 +75,7 @@ async def test_create_product(async_client: AsyncClient, test_category, auth_hea
     }
     
     response = await async_client.post(
-        "/api/v1/product/", 
+        "/api/v1/product", 
         json=product_data,
         headers=auth_headers
     )
@@ -99,7 +99,7 @@ async def test_create_product_with_invalid_category(async_client: AsyncClient, a
     }
     
     response = await async_client.post(
-        "/api/v1/product/", 
+        "/api/v1/product", 
         json=product_data,
         headers=auth_headers
     )
@@ -116,14 +116,14 @@ async def test_create_product_unauthorized(async_client: AsyncClient, test_categ
         "category_id": str(test_category.category_id)
     }
     
-    response = await async_client.post("/api/v1/product/", json=product_data)
+    response = await async_client.post("/api/v1/product", json=product_data)
     
     assert response.status_code == 403
 
 @pytest.mark.asyncio
 async def test_list_products(async_client: AsyncClient, test_products):
     """Test listing all products with pagination"""
-    response = await async_client.get("/api/v1/product/")
+    response = await async_client.get("/api/v1/product")
     
     assert response.status_code == 200
     data = response.json()
@@ -150,7 +150,7 @@ async def test_list_products(async_client: AsyncClient, test_products):
 @pytest.mark.asyncio
 async def test_list_products_with_pagination(async_client: AsyncClient, test_products):
     """Test product listing with custom pagination parameters"""
-    response = await async_client.get("/api/v1/product/?page=1&page_size=2")
+    response = await async_client.get("/api/v1/product?page=1&page_size=2")
     
     assert response.status_code == 200
     data = response.json()
@@ -163,28 +163,28 @@ async def test_list_products_with_pagination(async_client: AsyncClient, test_pro
 async def test_list_products_with_filters(async_client: AsyncClient, test_products):
     """Test filtering products by various parameters"""
     # Filter by min_price
-    response = await async_client.get("/api/v1/product/?min_price=20")
+    response = await async_client.get("/api/v1/product?min_price=20")
     assert response.status_code == 200
     data = response.json()
     for product in data["items"]:
         assert product["price"] >= 20
     
     # Filter by max_price
-    response = await async_client.get("/api/v1/product/?max_price=15")
+    response = await async_client.get("/api/v1/product?max_price=15")
     assert response.status_code == 200
     data = response.json()
     for product in data["items"]:
         assert product["price"] <= 15
     
     # Filter by min_rating
-    response = await async_client.get("/api/v1/product/?min_rating=4.5")
+    response = await async_client.get("/api/v1/product?min_rating=4.5")
     assert response.status_code == 200
     data = response.json()
     for product in data["items"]:
         assert product["rating"] >= 4.5
     
     # Filter by name
-    response = await async_client.get("/api/v1/product/?name=Budget")
+    response = await async_client.get("/api/v1/product?name=Budget")
     assert response.status_code == 200
     data = response.json()
     assert all("Budget" in product["name"] for product in data["items"])
@@ -322,7 +322,7 @@ async def test_delete_product(async_client: AsyncClient, test_products, auth_hea
     assert test_product.deleted_at is not None
     
     # Verify product no longer appears in list
-    list_response = await async_client.get("/api/v1/product/")
+    list_response = await async_client.get("/api/v1/product")
     products = list_response.json()["items"]
     product_ids = [p["product_id"] for p in products]
     assert str(test_product.product_id) not in product_ids

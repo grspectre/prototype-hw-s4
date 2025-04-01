@@ -14,7 +14,7 @@ from app.core.security import get_current_user
 
 router = APIRouter()
 
-@router.post("/", response_model=ReviewRead)
+@router.post("", response_model=ReviewRead)
 async def create_review(
     review_data: ReviewCreate,
     db: AsyncSession = Depends(get_db),
@@ -67,7 +67,7 @@ async def create_review(
     
     return review
 
-@router.get("/", response_model=PaginatedResponse[ReviewRead])
+@router.get("", response_model=PaginatedResponse[ReviewRead])
 async def list_reviews(
     product_id: Optional[UUID] = None,
     user_id: Optional[UUID] = None,

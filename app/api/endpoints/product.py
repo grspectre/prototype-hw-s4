@@ -15,7 +15,7 @@ from app.schemas.pagination import PaginationParams, PaginatedResponse
 router = APIRouter()
 
 
-@router.post("/", response_model=ProductRead, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ProductRead, status_code=status.HTTP_201_CREATED)
 async def create_product(
     product_data: ProductCreate,
     db: AsyncSession = Depends(get_db),
@@ -45,7 +45,7 @@ async def create_product(
     return new_product
 
 
-@router.get("/", response_model=PaginatedResponse[ProductRead])
+@router.get("", response_model=PaginatedResponse[ProductRead])
 async def list_products(
     name: Optional[str] = None,
     min_price: Optional[float] = None,

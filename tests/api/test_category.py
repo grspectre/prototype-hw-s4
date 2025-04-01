@@ -22,7 +22,7 @@ async def test_category(async_session: AsyncSession):
 @pytest.mark.asyncio
 async def test_get_categories_empty(async_client: AsyncClient):
     """Тест получения пустого списка категорий."""
-    response = await async_client.get("/api/v1/category/")
+    response = await async_client.get("/api/v1/category")
     
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
@@ -34,7 +34,7 @@ async def test_get_categories_empty(async_client: AsyncClient):
 @pytest.mark.asyncio
 async def test_get_categories_with_data(async_client: AsyncClient, test_category: Category):
     """Тест получения списка категорий с данными."""
-    response = await async_client.get("/api/v1/category/")
+    response = await async_client.get("/api/v1/category")
     
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
@@ -70,7 +70,7 @@ async def test_create_category_unauthorized(async_client: AsyncClient):
     """Тест создания категории без авторизации."""
     category_data = {"name": "Unauthorized Category"}
     
-    response = await async_client.post("/api/v1/category/", json=category_data)
+    response = await async_client.post("/api/v1/category", json=category_data)
     
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
@@ -82,7 +82,7 @@ async def test_create_category(async_client: AsyncClient, auth_headers: dict):
     category_data = {"name": "New Category"}
     
     response = await async_client.post(
-        "/api/v1/category/", 
+        "/api/v1/category", 
         json=category_data,
         headers=auth_headers
     )
@@ -101,7 +101,7 @@ async def test_create_duplicate_category(async_client: AsyncClient, test_categor
     category_data = {"name": test_category.name}
     
     response = await async_client.post(
-        "/api/v1/category/", 
+        "/api/v1/category", 
         json=category_data,
         headers=auth_headers
     )
@@ -209,7 +209,7 @@ async def test_pagination(async_client: AsyncClient, async_session: AsyncSession
     await async_session.commit()
     
     # Запрос первой страницы с 5 элементами
-    response1 = await async_client.get("/api/v1/category/?page=1&page_size=5")
+    response1 = await async_client.get("/api/v1/category?page=1&page_size=5")
     data1 = response1.json()
     
     assert response1.status_code == status.HTTP_200_OK
@@ -219,7 +219,7 @@ async def test_pagination(async_client: AsyncClient, async_session: AsyncSession
     assert data1["page_size"] == 5
     
     # Запрос второй страницы с 5 элементами
-    response2 = await async_client.get("/api/v1/category/?page=2&page_size=5")
+    response2 = await async_client.get("/api/v1/category?page=2&page_size=5")
     data2 = response2.json()
     
     assert response2.status_code == status.HTTP_200_OK

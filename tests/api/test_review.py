@@ -12,7 +12,7 @@ test_review_id = str(uuid.uuid4())
 async def test_category(async_client: AsyncClient, auth_headers: dict):
     """Create a test category for products"""
     response = await async_client.post(
-        "/api/v1/category/",
+        "/api/v1/category",
         json={"name": "Test Category"},
         headers=auth_headers
     )
@@ -23,7 +23,7 @@ async def test_category(async_client: AsyncClient, auth_headers: dict):
 async def test_product(async_client: AsyncClient, auth_headers: dict, test_category):
     """Create a test product for reviews"""
     response = await async_client.post(
-        "/api/v1/product/",
+        "/api/v1/product",
         json={
             "name": "Test Product",
             "price": 99.99,
@@ -38,7 +38,7 @@ async def test_product(async_client: AsyncClient, auth_headers: dict, test_categ
 async def test_review(async_client: AsyncClient, auth_headers: dict, test_product):
     """Create a test review"""
     response = await async_client.post(
-        "/api/v1/review/",
+        "/api/v1/review",
         json={
             "product_id": test_product["product_id"],
             "text": "This is a test review",
@@ -55,7 +55,7 @@ class TestReviewEndpoints:
     async def test_create_review(self, async_client: AsyncClient, auth_headers: dict, test_product):
         """Test creating a new review"""
         response = await async_client.post(
-            "/api/v1/review/",
+            "/api/v1/review",
             json={
                 "product_id": test_product["product_id"],
                 "text": "Great product, would buy again!",
@@ -78,7 +78,7 @@ class TestReviewEndpoints:
     async def test_duplicate_review(self, async_client: AsyncClient, auth_headers: dict, test_review, test_product):
         """Test attempting to create a second review for the same product by the same user"""
         response = await async_client.post(
-            "/api/v1/review/",
+            "/api/v1/review",
             json={
                 "product_id": test_product["product_id"],
                 "text": "Another review for the same product",
@@ -95,7 +95,7 @@ class TestReviewEndpoints:
         """Test creating a review for a non-existent product"""
         nonexistent_id = str(uuid.uuid4())
         response = await async_client.post(
-            "/api/v1/review/",
+            "/api/v1/review",
             json={
                 "product_id": nonexistent_id,
                 "text": "This product doesn't exist",
@@ -112,7 +112,7 @@ class TestReviewEndpoints:
         """Test creating a review with an invalid rating"""
         # Test with rating below minimum
         response = await async_client.post(
-            "/api/v1/review/",
+            "/api/v1/review",
             json={
                 "product_id": test_product["product_id"],
                 "text": "Invalid rating",
@@ -124,7 +124,7 @@ class TestReviewEndpoints:
         
         # Test with rating above maximum
         response = await async_client.post(
-            "/api/v1/review/",
+            "/api/v1/review",
             json={
                 "product_id": test_product["product_id"],
                 "text": "Invalid rating",
@@ -165,7 +165,7 @@ class TestReviewEndpoints:
     async def test_list_all_reviews(self, async_client: AsyncClient, auth_headers: dict, test_review):
         """Test listing all reviews"""
         response = await async_client.get(
-            "/api/v1/review/",
+            "/api/v1/review",
             headers=auth_headers
         )
         
@@ -189,7 +189,7 @@ class TestReviewEndpoints:
     async def test_filter_reviews_by_product(self, async_client: AsyncClient, auth_headers: dict, test_review, test_product):
         """Test filtering reviews by product ID"""
         response = await async_client.get(
-            f"/api/v1/review/?product_id={test_product['product_id']}",
+            f"/api/v1/review?product_id={test_product['product_id']}",
             headers=auth_headers
         )
         
@@ -209,7 +209,7 @@ class TestReviewEndpoints:
         for rating in ratings:
             # Create a new product for each rating to avoid duplicate review error
             product_response = await async_client.post(
-                "/api/v1/product/",
+                "/api/v1/product",
                 json={
                     "name": f"Test Product {rating}",
                     "price": 99.99,
@@ -220,7 +220,7 @@ class TestReviewEndpoints:
             product = product_response.json()
             
             await async_client.post(
-                "/api/v1/review/",
+                "/api/v1/review",
                 json={
                     "product_id": product["product_id"],
                     "text": f"Review with rating {rating}",
@@ -231,7 +231,7 @@ class TestReviewEndpoints:
         
         # Test min_rating filter
         response = await async_client.get(
-            "/api/v1/review/?min_rating=4",
+            "/api/v1/review?min_rating=4",
             headers=auth_headers
         )
         
@@ -243,7 +243,7 @@ class TestReviewEndpoints:
         
         # Test max_rating filter
         response = await async_client.get(
-            "/api/v1/review/?max_rating=3",
+            "/api/v1/review?max_rating=3",
             headers=auth_headers
         )
         
@@ -255,7 +255,7 @@ class TestReviewEndpoints:
         
         # Test min_rating and max_rating together
         response = await async_client.get(
-            "/api/v1/review/?min_rating=3&max_rating=4",
+            "/api/v1/review?min_rating=3&max_rating=4",
             headers=auth_headers
         )
         
@@ -384,7 +384,7 @@ class TestReviewEndpoints:
         
         for i, rating in enumerate(ratings):
             product_response = await async_client.post(
-                "/api/v1/product/",
+                "/api/v1/product",
                 json={
                     "name": f"Stats Test Product {i}",
                     "price": 99.99,
@@ -395,7 +395,7 @@ class TestReviewEndpoints:
             product = product_response.json()
             
             await async_client.post(
-                "/api/v1/review/",
+                "/api/v1/review",
                 json={
                     "product_id": product["product_id"],
                     "text": f"Review with rating {rating}",
@@ -451,7 +451,7 @@ class TestReviewEndpoints:
         # Create multiple products and reviews to test pagination
         for i in range(15):
             product_response = await async_client.post(
-                "/api/v1/product/",
+                "/api/v1/product",
                 json={
                     "name": f"Pagination Test Product {i}",
                     "price": 99.99,
@@ -462,7 +462,7 @@ class TestReviewEndpoints:
             product = product_response.json()
             
             await async_client.post(
-                "/api/v1/review/",
+                "/api/v1/review",
                 json={
                     "product_id": product["product_id"],
                     "text": f"Pagination test review {i}",
@@ -473,7 +473,7 @@ class TestReviewEndpoints:
         
         # Test first page with custom page size
         response = await async_client.get(
-            "/api/v1/review/?page=1&page_size=5",
+            "/api/v1/review?page=1&page_size=5",
             headers=auth_headers
         )
         
@@ -486,7 +486,7 @@ class TestReviewEndpoints:
         
         # Test second page
         response = await async_client.get(
-            "/api/v1/review/?page=2&page_size=5",
+            "/api/v1/review?page=2&page_size=5",
             headers=auth_headers
         )
         
@@ -497,7 +497,7 @@ class TestReviewEndpoints:
         
         # The items on page 2 should be different from page 1
         page1_response = await async_client.get(
-            "/api/v1/review/?page=1&page_size=5",
+            "/api/v1/review?page=1&page_size=5",
             headers=auth_headers
         )
         page1_data = page1_response.json()
